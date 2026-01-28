@@ -6,35 +6,31 @@ import { cn } from "@/lib/utils";
 
 /**
  * Workflow Steps Data
- * Single source of truth for all workflow demos
  */
-const WORKFLOW_STEPS = [
+const STEPS = [
   {
     id: "summary",
     title: "Article Summary",
-    description: "Browse web + \"Summarize key points.\"",
-    highlight: "Auto-reads and summarizes.",
-    videoSrc: "/videos/workflow/summary-demo.mp4",
+    desc: "Browse web + \"Summarize key points.\" Auto-reads and summarizes.",
+    src: "/videos/workflow/step1-summary.mp4",
   },
   {
     id: "translate",
     title: "Instant Translation",
-    description: "Select text + \"Translate to German.\"",
-    highlight: "Outputs translation directly.",
-    videoSrc: "/videos/workflow/summary-demo.mp4", // Placeholder
+    desc: "Select text + \"Translate to German.\" Outputs translation directly.",
+    src: "/videos/workflow/step2-translate.mp4",
   },
   {
     id: "analyze",
     title: "Data Analysis",
-    description: "Extract insights from tables.",
-    highlight: "Formats data instantly.",
-    videoSrc: "/videos/workflow/summary-demo.mp4", // Placeholder
+    desc: "Extract insights from tables. Formats data instantly.",
+    src: "/videos/workflow/step3-analyze.mp4",
   },
 ];
 
 /**
  * WorkflowSection Component
- * Section 4: Seamless Workflows - Sticky Scroll Layout
+ * Both columns stay sticky, scroll progress drives state changes
  */
 export default function WorkflowSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -49,27 +45,43 @@ export default function WorkflowSection() {
 
   // Calculate active index and step progress based on scroll
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    const stepCount = WORKFLOW_STEPS.length;
+    const stepCount = STEPS.length;
     const stepSize = 1 / stepCount;
     const currentIndex = Math.min(Math.floor(latest / stepSize), stepCount - 1);
-    
+
     // Calculate progress within current step (0 to 1)
     const progressInStep = (latest - currentIndex * stepSize) / stepSize;
-    
-    setActiveIndex(currentIndex);
+
+    setActiveIndex(Math.max(0, currentIndex));
     setStepProgress(Math.min(Math.max(progressInStep, 0), 1));
   });
+
+  // Handle step click navigation
+  const handleStepClick = (index: number) => {
+    if (!sectionRef.current) return;
+    
+    const sectionTop = sectionRef.current.offsetTop;
+    const sectionHeight = sectionRef.current.offsetHeight - window.innerHeight;
+    const targetProgress = (index + 0.5) / STEPS.length;
+    const targetScroll = sectionTop + sectionHeight * targetProgress;
+    
+    window.scrollTo({
+      top: targetScroll,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <section
       ref={sectionRef}
-      className="relative w-full bg-black"
-      style={{ height: `${WORKFLOW_STEPS.length * 100}vh` }}
+      className="relative w-full bg-black pt-45"
+      style={{ height: `${STEPS.length * 100}vh` }}
     >
-      <div className="sticky top-0 h-screen">
+      {/* Sticky Container - Both columns stay fixed */}
+      <div className="sticky top-[-60px] h-screen overflow-hidden">
         <div className="mx-auto max-w-container px-6 h-full flex flex-col justify-center">
           {/* Section Header */}
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <motion.h2
               className="text-h2 text-white mb-4"
               initial={{ opacity: 0, y: 20 }}
@@ -90,27 +102,50 @@ export default function WorkflowSection() {
             </motion.p>
           </div>
 
-          {/* Main Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left Column - Scroll Triggers */}
-            <div className="flex flex-col gap-6">
-              {WORKFLOW_STEPS.map((step, index) => (
-                <WorkflowStep
-                  key={step.id}
-                  step={step}
-                  isActive={index === activeIndex}
-                  progress={index === activeIndex ? stepProgress : index < activeIndex ? 1 : 0}
-                />
-              ))}
+          {/* Main Grid - 30/70 Split */}
+          <div className="grid grid-cols-1 lg:grid-cols-[30%_70%] gap-12 items-start">
+            {/* Left Column - Progress & Steps (All Sticky) */}
+            <div className="flex flex-col">
+              {/* Progress Indicator */}
+              <div className="flex items-center gap-3 mb-8">
+                {STEPS.map((step, index) => (
+                  <ProgressDot
+                    key={step.id}
+                    isActive={index === activeIndex}
+                    progress={index === activeIndex ? stepProgress : index < activeIndex ? 1 : 0}
+                    onClick={() => handleStepClick(index)}
+                  />
+                ))}
+              </div>
+
+              {/* Step Items */}
+              <div className="flex flex-col gap-0">
+                {STEPS.map((step, index) => (
+                  <StepItem
+                    key={step.id}
+                    step={step}
+                    isActive={index === activeIndex}
+                    onClick={() => handleStepClick(index)}
+                  />
+                ))}
+              </div>
             </div>
 
-            {/* Right Column - Sticky Video Stage */}
-            <div className="h-fit">
+            {/* Right Column - Video Stage */}
+            <div className="hidden lg:block">
               <VideoStage
-                videoSrc={WORKFLOW_STEPS[activeIndex].videoSrc}
-                stepId={WORKFLOW_STEPS[activeIndex].id}
+                videoSrc={STEPS[activeIndex].src}
+                stepId={STEPS[activeIndex].id}
               />
             </div>
+          </div>
+
+          {/* Mobile Video - Below steps on small screens */}
+          <div className="lg:hidden mt-8">
+            <VideoStage
+              videoSrc={STEPS[activeIndex].src}
+              stepId={STEPS[activeIndex].id}
+            />
           </div>
         </div>
       </div>
@@ -119,70 +154,73 @@ export default function WorkflowSection() {
 }
 
 /**
- * WorkflowStep Component
- * Individual step with progress indicator
+ * ProgressDot Component
  */
-interface WorkflowStepProps {
-  step: (typeof WORKFLOW_STEPS)[number];
+interface ProgressDotProps {
   isActive: boolean;
   progress: number;
+  onClick?: () => void;
 }
 
-function WorkflowStep({ step, isActive, progress }: WorkflowStepProps) {
+function ProgressDot({ isActive, progress, onClick }: ProgressDotProps) {
   return (
-    <div className="relative">
-      {/* Progress Indicator */}
-      <div className="mb-4 flex items-center gap-3">
+    <motion.div
+      className={cn(
+        "relative rounded-full flex items-center justify-start p-[2px] cursor-pointer",
+        isActive ? "w-[52px] h-3 bg-white" : "w-3 h-3 bg-white/50"
+      )}
+      animate={{
+        width: isActive ? 52 : 12,
+        height: 12,
+        backgroundColor: isActive ? "#ffffff" : "rgba(255, 255, 255, 0.5)",
+      }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      onClick={onClick}
+    >
+      {isActive && (
         <motion.div
-          className="relative overflow-hidden rounded-full bg-zinc-800"
-          animate={{
-            width: isActive ? 48 : 8,
-            height: 8,
-          }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-        >
-          {/* Fill Bar */}
-          <motion.div
-            className="absolute inset-y-0 left-0 bg-white rounded-full"
-            style={{ width: `${progress * 100}%` }}
-          />
-        </motion.div>
-      </div>
+          className="h-full bg-black rounded-full"
+          style={{ width: `${progress * 100}%` }}
+        />
+      )}
+    </motion.div>
+  );
+}
 
-      {/* Text Content */}
-      <motion.div
-        animate={{
-          opacity: isActive ? 1 : 0.4,
-        }}
-        transition={{ duration: 0.3 }}
-      >
-        <h3
-          className={cn(
-            "text-2xl lg:text-3xl font-medium transition-colors duration-300",
-            isActive ? "text-white" : "text-zinc-600"
-          )}
-        >
-          {step.title}
-        </h3>
-        
-        {isActive && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <p className="text-base lg:text-lg text-zinc-400 mt-3">
-              {step.description}
-            </p>
-            <p className="text-base lg:text-lg text-zinc-400 mt-1">
-              <span className="text-zinc-300">→</span> {step.highlight}
-            </p>
-          </motion.div>
+/**
+ * StepItem Component
+ */
+interface StepItemProps {
+  step: (typeof STEPS)[number];
+  isActive: boolean;
+  onClick?: () => void;
+}
+
+function StepItem({ step, isActive, onClick }: StepItemProps) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col justify-center py-6 cursor-pointer transition-opacity duration-300",
+        !isActive && "opacity-50"
+      )}
+      onClick={onClick}
+    >
+      <h3
+        className={cn(
+          "text-[28px] font-semibold transition-colors duration-300",
+          isActive ? "text-white" : "text-white/50"
         )}
-      </motion.div>
-
-      {/* Divider */}
+      >
+        {step.title}
+      </h3>
+      <p
+        className={cn(
+          "text-base font-normal mt-2 transition-colors duration-300",
+          isActive ? "text-zinc-300" : "text-zinc-500"
+        )}
+      >
+        {step.desc}
+      </p>
       <div className="mt-6 h-px bg-zinc-800/50" />
     </div>
   );
@@ -190,7 +228,6 @@ function WorkflowStep({ step, isActive, progress }: WorkflowStepProps) {
 
 /**
  * VideoStage Component
- * The sticky white card containing the demo video
  */
 interface VideoStageProps {
   videoSrc: string;
@@ -200,24 +237,20 @@ interface VideoStageProps {
 function VideoStage({ videoSrc, stepId }: VideoStageProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Restart video when step changes
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {
-        // Autoplay may be blocked
-      });
+      videoRef.current.play().catch(() => {});
     }
   }, [stepId]);
 
   return (
     <motion.div
       className={cn(
-        "relative w-full h-[400px] lg:h-[500px]",
-        "bg-white rounded-[24px]",
-        "shadow-2xl shadow-black/20",
-        "overflow-hidden",
-        "border border-white/10"
+        "relative w-full aspect-[5/4]",
+        "bg-zinc-900 rounded-[20px]",
+        "shadow-2xl shadow-black/30",
+        "overflow-hidden"
       )}
       initial={{ opacity: 0, scale: 0.95 }}
       whileInView={{ opacity: 1, scale: 1 }}
@@ -232,7 +265,7 @@ function VideoStage({ videoSrc, stepId }: VideoStageProps) {
         muted
         loop
         playsInline
-        className="w-full h-full object-cover object-top"
+        className="w-full h-full object-cover"
       />
     </motion.div>
   );

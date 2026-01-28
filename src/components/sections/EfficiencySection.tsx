@@ -53,7 +53,7 @@ const cards = [
     subtitle: "Write a thank you email",
     icon: "/images/icon-flow-stones.png",
     video: "/videos/demo-flow.mp4",
-    background: "bg-gradient-to-b from-[#040319] to-[#5270AE]",
+    background: "bg-gradient-to-b from-blue-900/40 to-blue-900/10",
     listItems: [
       "Voice → Intent → Smart Output",
       "Auto-reads current page context",
@@ -112,6 +112,7 @@ interface ComparisonCardProps {
 }
 
 function ComparisonCard({
+  id,
   title,
   subtitle,
   icon,
@@ -119,12 +120,14 @@ function ComparisonCard({
   background,
   listItems,
 }: ComparisonCardProps) {
+  const isFlowCard = id === "flow";
+  
   return (
     <motion.div
       className={cn(
         "relative flex flex-col",
         "rounded-[20px]",
-        "border border-white/15",
+        isFlowCard ? "border border-blue-500/30" : "border border-white/15",
         "pt-8 px-12 pb-12",
         "overflow-hidden",
         background
@@ -159,15 +162,15 @@ function ComparisonCard({
           ))}
         </ul>
 
-        {/* Video Container - Fixed height, white bg for seamless extension */}
-        <div className="mt-8 rounded-[15px] overflow-hidden h-[280px] bg-white">
+        {/* Video Container - Auto height to fit video */}
+        <div className="mt-8 rounded-[15px] overflow-hidden bg-white">
           <video
             src={video}
             autoPlay
             muted
             loop
             playsInline
-            className="w-full h-auto"
+            className="w-full h-auto block"
           />
         </div>
       </div>

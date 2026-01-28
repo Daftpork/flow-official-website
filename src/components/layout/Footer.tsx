@@ -79,7 +79,7 @@ export default function Footer() {
       </div>
 
       {/* Massive Brand Anchor */}
-      <div className="mt-12 mx-auto max-w-container px-6 pointer-events-none">
+      <div className="mt-12 pb-20 mx-auto max-w-container px-6 pointer-events-none">
         <Image
           src="/images/footer-flow.svg"
           alt="Flow"

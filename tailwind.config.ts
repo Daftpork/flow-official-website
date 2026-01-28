@@ -47,8 +47,8 @@ const config: Config = {
        * 严格对应 CONTEXT.md 的 Hierarchy
        */
       fontSize: {
-        // H1 Hero Title (~64px-80px)
-        "h1": ["4.5rem", { lineHeight: "1.1", letterSpacing: "0", fontWeight: "600" }],
+        // H1 Hero Title (~84px)
+        "h1": ["5.25rem", { lineHeight: "1.1", letterSpacing: "0", fontWeight: "600" }],
         
         // H2 Section Title (~56px)
         "h2": ["3.5rem", { lineHeight: "1.1", letterSpacing: "-0.01em", fontWeight: "600" }],

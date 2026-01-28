@@ -81,16 +81,8 @@ export default function CTASection() {
           }}
         />
 
-        {/* Rotating Stones Image */}
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{
-            duration: 120,
-            ease: "linear",
-            repeat: Infinity,
-          }}
-          className="relative"
-        >
+        {/* Stones Image - Static */}
+        <div className="relative">
           <Image
             src="/images/cta-stones.png"
             alt="Decorative glass stones"
@@ -99,7 +91,7 @@ export default function CTASection() {
             className="w-full max-w-[800px] h-auto"
             priority
           />
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -73,10 +73,11 @@ export default function PricingSection() {
         </motion.div>
 
         {/* Pricing Cards */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
           {PLANS.map((plan, index) => (
             <motion.div
               key={plan.name}
+              className="h-full"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -197,7 +198,7 @@ function PricingCard({ plan, billingCycle }: PricingCardProps) {
       </div>
 
       {/* Features */}
-      <ul className="flex-1 space-y-3 mb-8">
+      <ul className="flex-1 space-y-3">
         {plan.features.map((feature, index) => (
           <li key={index} className="flex items-start gap-3">
             <CheckIcon className="w-5 h-5 text-zinc-400 flex-shrink-0 mt-0.5" />
@@ -206,22 +207,27 @@ function PricingCard({ plan, billingCycle }: PricingCardProps) {
         ))}
       </ul>
 
-      {/* CTA Button */}
-      <button
-        className={cn(
-          "w-full py-3.5 rounded-full font-medium text-base transition-colors duration-200",
-          "bg-white text-black hover:bg-zinc-200"
-        )}
-      >
-        Download for Free
-      </button>
+      {/* Bottom Section - Fixed height for alignment */}
+      <div className="mt-8">
+        {/* CTA Button */}
+        <button
+          className={cn(
+            "w-full py-3.5 rounded-full font-medium text-base transition-colors duration-200",
+            "bg-white text-black hover:bg-zinc-200"
+          )}
+        >
+          Download for Free
+        </button>
 
-      {/* Pro Trial Note */}
-      {isProPlan && (
-        <p className="text-center text-sm text-zinc-400 mt-4">
-          🎁 14-day free trial of all Pro features
-        </p>
-      )}
+        {/* Pro Trial Note - Fixed height placeholder for Free card */}
+        <div className="h-10 flex items-center justify-center">
+          {isProPlan && (
+            <p className="text-center text-sm text-zinc-400">
+              🎁 14-day free trial of all Pro features
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
